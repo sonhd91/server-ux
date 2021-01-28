@@ -11,6 +11,7 @@ msgstr ""
 "POT-Creation-Date: 2017-05-17 21:08+0000\n"
 "PO-Revision-Date: 2021-03-16 11:46+0000\n"
 "Last-Translator: Ana Suárez <ana.suarez@qubiq.es>\n"
+"_prepare_fields" function which is more suitable.
 "Language-Team: Spanish (https://www.transifex.com/oca/teams/23907/es/)\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"

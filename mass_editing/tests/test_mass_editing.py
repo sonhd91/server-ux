@@ -185,14 +185,14 @@ class TestMassEditing(common.SavepointCase):
         self.env['res.users.log'].sudo(self.user).create({})
         self.assertTrue(self.user.log_ids)
         # Remove one log_ids
-        vals = {"selection__log_ids": "remove"}
+        vals = {"selection__log_ids": "remove_o2m"}
         self._create_wizard_and_apply_values(
             self.mass_editing_user, self.user, vals)
         self.assertFalse(
             self.user.log_ids.exists(), "User's log_ids should be removed.")
         # Set one log_ids
         vals = {
-            'selection__log_ids': 'set',
+            'selection__log_ids': 'set_o2m',
             'log_ids': [[
                 0,
                 0,
