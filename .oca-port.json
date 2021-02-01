@@ -1,0 +1,11 @@
+{
+    "12.0": {
+        "14.0": {
+            "mass_editing": {
+                "blacklist_pull_requests": {
+                    "149": true
+                }
+            }
+        }
+    }
+}
