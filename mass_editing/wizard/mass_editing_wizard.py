@@ -70,6 +70,11 @@ class MassEditingWizard(models.TransientModel):
                 ("remove_m2m", _("Remove")),
                 ("add", _("Add")),
             ]
+<<<<<<< HEAD
+=======
+        elif field.ttype == "one2many":
+            selection = [("set_o2m", _("Set")), ("remove_o2m", _("Remove"))]
+>>>>>>> [FIX] mass_editing: join list items on one line to try not to decrease coverage.
         else:
             selection = [("set", _("Set")), ("remove", _("Remove"))]
         result["selection__" + field.name] = {
