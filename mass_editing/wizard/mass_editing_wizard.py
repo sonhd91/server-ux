@@ -60,6 +60,12 @@ class MassEditingWizard(models.TransientModel):
         )
         return res
 
+    use_active_domain = fields.Boolean(
+        string="Search results",
+        help="Thick if you want to use the custom domain (+ domain of the "
+        "mass edition) instead of select all items manually.",
+    )
+
     @api.model
     def _prepare_fields(self, line, field, field_info):
         result = {}
@@ -149,15 +155,34 @@ class MassEditingWizard(models.TransientModel):
         field_info["domain"] = "[]"
         return field_info
 
-    @api.model
-    def create(self, vals):
-        server_action_id = self.env.context.get("server_action_id")
-        server_action = self.env["ir.actions.server"].sudo().browse(server_action_id)
-        active_ids = self.env.context.get("active_ids", [])
-        if server_action and active_ids:
-            TargetModel = self.env[server_action.model_id.model]
+    @api.model_create_multi
+    def create(self, list_vals):
+        wizards = self.browse()
+        for vals in list_vals:
+            # Split values to extract values from the current wizard and
+            # values used to update target records.
+            wizard_vals = {k: vals.get(k) for k in vals.keys() if k in self._fields}
+            edition_vals = {k: vals.get(k) for k in vals.keys() if k not in wizard_vals}
+            wizard = super().create(wizard_vals)
+            wizards |= wizard
+            if not edition_vals:
+                continue
+            wizard._update_items(edition_vals)
+        return wizards
+
+    def _update_items(self, vals):
+        """
+
+        :param vals: dict
+        :return: None
+        """
+        self.ensure_one()
+        mass_editing = self._get_mass_operation()
+        items = self._get_remaining_items(force_active_domain=self.use_active_domain)
+        if items:
             IrModelFields = self.env["ir.model.fields"]
             IrTranslation = self.env["ir.translation"]
+            active_ids = items.ids
 
             values = {}
             for key, val in vals.items():
@@ -172,10 +197,7 @@ class MassEditingWizard(models.TransientModel):
                         # If field to remove is translatable,
                         # its translations have to be removed
                         model_field = IrModelFields.search(
-                            [
-                                ("model", "=", server_action.model_id.model),
-                                ("name", "=", split_key),
-                            ]
+                            [("model", "=", items._name), ("name", "=", split_key)]
                         )
                         if model_field and model_field.translate:
                             translations = IrTranslation.search(
@@ -209,8 +231,7 @@ class MassEditingWizard(models.TransientModel):
                             m2m_list.append((4, m2m_id))
                         values.update({split_key: m2m_list})
             if values:
-                TargetModel.browse(active_ids).write(values)
-        return super().create({})
+                items.write(values)
 
     def read(self, fields, load="_classic_read"):
         """Without this call, dynamic fields build by fields_view_get()
