@@ -170,11 +170,8 @@ class MassEditingWizard(models.TransientModel):
                     split_key = key.split("__", 1)[1]
                     if val == "set":
                         values.update({split_key: vals.get(split_key, False)})
-
                     elif val == "set_o2m":
-                        values.update({
-                            split_key: vals.get(split_key, [(6, 0, [])])})
-
+                        values.update({split_key: vals.get(split_key, [(6, 0, [])])})
                     elif val == "remove":
                         values.update({split_key: False})
                         # If field to remove is translatable,
